@@ -25,8 +25,9 @@ class Home extends Component {
 	componentDidMount(){
 		console.log('componentDidMount')
 		//this.getUserSettings();
+		//var data = 'default user';
+		//this.props.fetchUser(data);
 		this.recognizeFace();
-
 		console.log('calling wakeword')
 		this.wakeWord();
 	}
