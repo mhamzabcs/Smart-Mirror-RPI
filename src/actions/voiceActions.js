@@ -23,6 +23,7 @@ export const fetchWakeWord = () => dispatch => {
   axios.get('http://localhost:4000/wakeWord')
       .then(response => {
         let yoloo = response.data.trim();
+        console.log(yoloo);
         if(yoloo === "detected"){
           console.log('wakeWord detected')
           dispatch({
@@ -34,7 +35,14 @@ export const fetchWakeWord = () => dispatch => {
         }
       })
       .catch(function (error) {
-        console.log(error);
+        console.log('catch');
+          var numb = Math.floor((Math.random() * 100) + 1);
+          console.log(numb);
+          dispatch({
+            type: FETCH_WAKE_WORD,
+            payload3: numb,
+            payload4: 'not detected'            
+          })
       })  
 }
 

@@ -8,7 +8,8 @@ const initialState = {
     goToVoiceApi: false,
     msg: 'Recognizing...',
     videoId: 0,
-    username: ''
+    username: '',
+    detected: ''
 }
 
 export default function (state = initialState, action) {
@@ -28,6 +29,7 @@ export default function (state = initialState, action) {
             goToVoiceApi: action.payload1,
             voiceText: action.payload2,
             value: action.payload3,
+            detected:action.payload4
         };
       case NEW_REMINDER:
         return {

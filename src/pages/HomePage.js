@@ -25,9 +25,9 @@ class Home extends Component {
 	componentDidMount(){
 		console.log('componentDidMount')
 		//this.getUserSettings();
-		//var data = 'default user';
-		//this.props.fetchUser(data);
-		this.recognizeFace();
+		var data = 'default user';
+		this.props.fetchUser(data);
+		//this.recognizeFace();
 		console.log('calling wakeword')
 		this.wakeWord();
 	}
@@ -38,20 +38,19 @@ class Home extends Component {
 
 
 	componentDidUpdate(prevProps) {
-		
 		if(this.props.goToVoiceApi !== prevProps.goToVoiceApi){
-
 			if(this.props.goToVoiceApi) {
 			  	console.log("componentDidUpdate calling voice func")
 			  	this.onCloseModal();
 				this.voiceFunction();
 			}
-
 			else{
 			  	console.log("componentDidUpdate calling wakeword func")
 			  	this.wakeWord();
 			}
-
+		}
+		if(this.props.detected === 'not detected'){
+			this.wakeWord();
 		}
 
 		if(this.props.username !== prevProps.username){
@@ -96,23 +95,29 @@ class Home extends Component {
   	}
 
   	recognizeFace(){
+  		console.log('in rec');
 		axios.get('http://localhost:4000/facial/recognize')
-			.then(response =>{
+		.then(response =>{
 
-				let data = response.data.trim();
-				console.log("user = " + data);
+			let data = response.data.trim();
+			console.log("user = " + data);
 
-				if(data === 'Unknown'){
-			    	data = 'default user'
-			    }
+			if(data === 'Unknown'){
+		    	data = 'default user'
+		    }
 
-				if(this.props.username !== data){
-					this.props.fetchUser(data);
-				}
-				else{
-					this.recognizeFace()
-				}
-			})
+			if(this.props.username !== data){
+				this.props.fetchUser(data);
+			}
+			else{
+				this.recognizeFace()
+			}
+		})
+		.catch(err =>{
+			console.log('err');
+			console.log(err);
+			this.recognizeFace();
+		});
     }
 
     getUserSettings(){
@@ -266,7 +271,8 @@ const mapStateToProps = state => ({
   date: state.voice.date,
   goToVoiceApi: state.voice.goToVoiceApi,
   message: state.voice.msg,
-  username: state.voice.username
+  username: state.voice.username,
+  detected: state.voice.detected
 });
 
 export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser })(Home);

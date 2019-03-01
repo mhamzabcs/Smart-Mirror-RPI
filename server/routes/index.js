@@ -10,7 +10,7 @@ router.get('/weather', function(req, res, next) {
 		if (err) { 
 			return console.log(err);
 		}
-		res.send(response.body);
+    	res.status(200).send(response.body);
 	});
 });
 
@@ -19,7 +19,7 @@ router.get('/forecast', function(req, res, next) {
 		if (err) { 
 			return console.log(err);
 		}
-		res.send(response.body);
+		res.status(200).send(response.body);
 	});
 });
 
@@ -28,8 +28,10 @@ router.get('/news', function(req, res, next) {
 	var nextCounter = 0;
 	var googleQuery="pakistan"; //search Query
 	myGoogleNews(googleQuery, function (err, reso){
-		if (err) console.error(err)
-		res.send(reso.links);
+		if (err) {
+			console.error(err)
+		}
+		res.status(200).send(reso.links);
 	  //number of pages if you want more than one page
 	  /*if (nextCounter < 4) {
 		nextCounter += 1
@@ -38,40 +40,25 @@ router.get('/news', function(req, res, next) {
 	});
 });
 
-
-//rename this router you shit!
-router.get('/voiceApi', function(req, res, next) {
-	console.log('inside voice api server');
-	var dir = __dirname + "\\python\\voice.py";
-	console.log(dir);
-	console.log("");
-	const spawn = require("child_process").spawn;
-	const pythonProcess = spawn('python',[dir]);
-	pythonProcess.stdout.on('data', (data) => {
-    	res.send(data);
-	});	
-});
-
 router.get('/wakeWord', function(req, res, next) {
-	console.log('inside wakeword server');
+	//console.log('inside wakeword server');
 	const spawn = require("child_process").spawn;
 	const pythonProcess = spawn('python',["E:\\Porcupine-1.3\\demo\\python\\porcupine_demo.py", "--keyword_file_paths", "E:\\Porcupine-1.3\\smartmirror_windows.ppn"]);
 	pythonProcess.stdout.on('data', (data) => {
-    	res.send(data);
+    	res.status(200).send(data);
 	});	
 });
 
 //rename this router you shit!
 router.get('/exp', function(req, res, next){
-	console.log('inside voice experiment');
+	//console.log('inside voice experiment');
 	var dir = __dirname + "\\python\\finalDraft.py";
 	const spawn = require("child_process").spawn;
 	const pythonProcess = spawn('python',[dir]);
 	pythonProcess.stdout.on('data', (data) => {
 		var resq = data.toString('utf8').split(/\r?\n/);
     	resq.length = 4;
-    	console.log(resq);
-		res.send(resq);
+		res.status(200).send(resq);
 	});
 });
 module.exports = router;
