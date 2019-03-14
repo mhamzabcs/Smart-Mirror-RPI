@@ -239,7 +239,7 @@ class Home extends Component {
 					</div>
 
 
-					<div className="middlew">{this.message_prompt()}</div>
+					<div className="middle">{this.message_prompt()}</div>
 
 
 					<div className="row" id='bottom-widgets'>
