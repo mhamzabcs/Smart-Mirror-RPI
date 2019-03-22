@@ -11,9 +11,10 @@ var facialRouter = require('./routes/facial');
 
 
 var db = require('monk')('mongodb://legolas427:proton27@ds127429.mlab.com:27429/mine');
-
-
 require('dotenv').config();
+
+var dest = process.env.WINDOWS_PATH; //change on rpi
+var wake = process.env.PORCUPINE_PATH; //change on rpi
 
 var app = express();
 
@@ -21,6 +22,13 @@ app.use(cors());
 
 app.use(function(req,res,next){
   req.db = db;
+  next();
+});
+
+//to pass path in all files.
+app.use(function(req,res,next){
+  req.dest = dest;
+  req.wake = wake;
   next();
 });
 

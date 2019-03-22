@@ -2,7 +2,7 @@ import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO
 import axios from 'axios';
 
 export const fetchVoice = () => dispatch => {
-  axios.get('http://localhost:4000/exp')
+  axios.get('http://localhost:4000/commands')
       .then(response => {
         console.log(response.data);
         dispatch({

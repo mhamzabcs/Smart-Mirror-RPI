@@ -11,8 +11,9 @@ API_ENDPOINT = 'https://api.wit.ai/message?v=20170307&q='
 wit_access_token = '2C2LGRSCVA6MQ2K53XCPBWMD52A4XSLF'
 
 r = sr.Recognizer()
-usb_mic = sr.Microphone.list_microphone_names().index("usb_mic")
-mic = sr.Microphone(device_index=usb_mic)
+#usb_mic = sr.Microphone.list_microphone_names().index("usb_mic")
+#mic = sr.Microphone(device_index=usb_mic)
+mic = sr.Microphone()
 with mic as source:
     r.adjust_for_ambient_noise(source,0.5)
     #print('say')
