@@ -19,13 +19,10 @@ var app = express();
 
 app.use(cors());
 
-
-
 app.use(function(req,res,next){
   req.db = db;
   next();
 });
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

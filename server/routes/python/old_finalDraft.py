@@ -1,8 +1,8 @@
+import speech_recognition as sr
 from os import path
 import sys
 import requests
 import json
-import speech_recognition as sr
 
 # Wit speech API endpoint
 API_ENDPOINT = 'https://api.wit.ai/message?v=20170307&q='
@@ -11,13 +11,11 @@ API_ENDPOINT = 'https://api.wit.ai/message?v=20170307&q='
 wit_access_token = '2C2LGRSCVA6MQ2K53XCPBWMD52A4XSLF'
 
 r = sr.Recognizer()
-usb_mic = sr.Microphone.list_microphone_names().index("usb_mic")
-mic = sr.Microphone(device_index=usb_mic)
+
+mic = sr.Microphone()
 with mic as source:
-    r.adjust_for_ambient_noise(source,0.5)
-    #print('say')
-    audio = r.record(source, duration=5)
-    #print('over')
+    r.adjust_for_ambient_noise(source)
+    audio = r.listen(source)
 
 def getIntent(text):
     # defining headers for HTTP request
@@ -25,8 +23,7 @@ def getIntent(text):
     # making an HTTP post request
     resp = requests.post(API_ENDPOINT + text, headers = headers)
     # converting response content to JSON format
-    #strnobytesissue data = json.loads(resp.content)
-    data = json.loads(resp.content.decode('utf-8'))
+    data = json.loads(resp.content)
     # get text from data
     intent=data['entities']['intent'][0]['value']
     print(intent)

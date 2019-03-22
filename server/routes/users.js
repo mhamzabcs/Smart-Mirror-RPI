@@ -20,7 +20,6 @@ router.post('/getSettings', function(req, res, next) {
   })
 });
 
-
 router.post('/db_reminders', function(req, res, next) {
   console.log("In reminders");
   console.log(req.body);
@@ -39,7 +38,6 @@ router.post('/db_reminders', function(req, res, next) {
   })
   res.status(200).send('Reminder added');
 });
-
 
 router.post('/get_reminders', function(req, res, next) {
   console.log("In get_reminders");
