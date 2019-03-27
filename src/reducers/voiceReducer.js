@@ -1,4 +1,4 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from '../actions/types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER, VOICE_INDICATOR } from '../actions/types';
 
 const initialState = {
     voiceText: '',
@@ -9,7 +9,8 @@ const initialState = {
     msg: 'Recognizing...',
     videoId: 0,
     username: '',
-    detected: ''
+    detected: '',
+    v_indicator:''
 }
 
 export default function (state = initialState, action) {
@@ -57,6 +58,11 @@ export default function (state = initialState, action) {
         return {
             ...state,
             username: action.payload
+        };
+      case VOICE_INDICATOR:
+        return {
+            ...state,
+            voiceText: action.payload
         };
       default: 
         return state;

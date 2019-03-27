@@ -10,7 +10,7 @@ import axios from 'axios';
 import Modal from "react-responsive-modal";
 import FadeProps from 'fade-props';
 import { connect } from 'react-redux';
-import { fetchVoice, fetchWakeWord, changeMessage, fetchUser } from '../actions/voiceActions';
+import { fetchVoice, fetchWakeWord, changeMessage, fetchUser, voiceIndicator } from '../actions/voiceActions';
 
 
 class Home extends Component {
@@ -43,6 +43,10 @@ class Home extends Component {
 			  	console.log("componentDidUpdate calling voice func")
 			  	this.onCloseModal();
 				this.voiceFunction();
+				var vi = 'listening...'
+				setTimeout(() => {
+					this.props.voiceIndicator(vi)
+				}, 4000);
 			}
 			else{
 			  	console.log("componentDidUpdate calling wakeword func")
@@ -111,6 +115,8 @@ class Home extends Component {
 			//else{
 			//	this.recognizeFace()
 			//}
+			var vi = '';
+			this.props.voiceIndicator(vi)
 		})
 		.catch(err =>{
 			console.log('err');
@@ -174,12 +180,19 @@ class Home extends Component {
     		console.log(this.props.value);
     		if(this.props.value === 'login'){
     			console.log('logging in');
+    			var vi = 'logging in, kindly look at the camera';
+    			this.props.voiceIndicator(vi)
     			this.recognizeFace();
     		}
     		else if(this.props.value === 'logout'){
-    			console.log('logging out');
-    			var data = 'default user';
+    		var data = 'default user';
 				this.props.fetchUser(data);
+				var vii = 'logging out...';
+    			this.props.voiceIndicator(vii)
+    			setTimeout(() => {
+			  		vii = '';
+    				this.props.voiceIndicator(vii)
+				}, 1000);
     		}
     	}
     }
@@ -284,7 +297,8 @@ const mapStateToProps = state => ({
   goToVoiceApi: state.voice.goToVoiceApi,
   message: state.voice.msg,
   username: state.voice.username,
-  detected: state.voice.detected
+  detected: state.voice.detected,
+  v_indicator: state.voice.v_indicator
 });
 
-export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser })(Home);
+export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser, voiceIndicator })(Home);

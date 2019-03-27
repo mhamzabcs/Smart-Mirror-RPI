@@ -42,7 +42,7 @@ router.get('/news', function(req, res, next) {
 
 router.get('/wakeWord', function(req, res, next) {
 	console.log('inside wakeword server');
-	const file = req.wake + "demo/python/porcupine_demo.py"
+	const file = req.wake + "demo/python/backup.py"
 	const model = req.wake + "smartmirror_windows.ppn"
 
 	const { spawn } = require("child_process");

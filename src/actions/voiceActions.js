@@ -1,4 +1,4 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from './types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER, VOICE_INDICATOR } from './types';
 import axios from 'axios';
 
 export const fetchVoice = () => dispatch => {
@@ -62,8 +62,18 @@ export const fetchWakeWord = () => dispatch => {
           dispatch({
             type: FETCH_WAKE_WORD,
             payload1: true,
-            payload2: 'Listening...',
+            payload2: 'please wait',
             payload3: '',
+          })
+        }
+        else{
+          console.log('not detected');
+          var numb = Math.floor((Math.random() * 100) + 1);
+          console.log(numb);
+          dispatch({
+            type: FETCH_WAKE_WORD,
+            payload3: numb,
+            payload4: 'not detected'            
           })
         }
       })
@@ -90,6 +100,14 @@ export const createReminder = (value,date,username) => dispatch => {
             payload2: ''
         })
      });
+}
+
+export const voiceIndicator = v_indicator => dispatch => {
+  console.log('yo')
+  dispatch({
+      type: VOICE_INDICATOR,
+      payload: v_indicator,
+  }) 
 }
 
 export const changeMessage = username => dispatch => {
