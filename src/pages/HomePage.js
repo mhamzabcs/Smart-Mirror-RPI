@@ -98,7 +98,6 @@ class Home extends Component {
   		console.log('in rec');
 		axios.get('http://localhost:4000/facial/recognize')
 		.then(response =>{
-
 			let data = response.data.trim();
 			console.log("user = " + data);
 
@@ -109,9 +108,9 @@ class Home extends Component {
 			if(this.props.username !== data){
 				this.props.fetchUser(data);
 			}
-			else{
-				this.recognizeFace()
-			}
+			//else{
+			//	this.recognizeFace()
+			//}
 		})
 		.catch(err =>{
 			console.log('err');
@@ -140,7 +139,7 @@ class Home extends Component {
 						w4:'Media Player'
 					});
 				}
-				this.recognizeFace()
+				//this.recognizeFace()
 			})
     }
 
@@ -148,6 +147,7 @@ class Home extends Component {
 		console.log('going to voice api? = ' + this.props.goToVoiceApi);
 		if(this.props.goToVoiceApi){
 			this.props.fetchVoice();
+			console.log('here');
 		}
 		else{
 			console.log('not going in there bro');
@@ -169,6 +169,18 @@ class Home extends Component {
     	console.log(this.props.intent)
     	if(this.props.intent === 'expand'){	
     		this.onOpenModal(this.props.value);
+    	}
+    	if(this.props.intent === 'command'){
+    		console.log(this.props.value);
+    		if(this.props.value === 'login'){
+    			console.log('logging in');
+    			this.recognizeFace();
+    		}
+    		else if(this.props.value === 'logout'){
+    			console.log('logging out');
+    			var data = 'default user';
+				this.props.fetchUser(data);
+    		}
     	}
     }
 

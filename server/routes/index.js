@@ -44,22 +44,44 @@ router.get('/wakeWord', function(req, res, next) {
 	console.log('inside wakeword server');
 	const file = req.wake + "demo/python/porcupine_demo.py"
 	const model = req.wake + "smartmirror_windows.ppn"
-	const spawn = require("child_process").spawn;
-	const pythonProcess = spawn('python',[file, "--keyword_file_paths", model]);
+
+	const { spawn } = require("child_process");
+	const pythonProcess = spawn('python',[file,"--keyword_file_paths" ,model]);
 	pythonProcess.stdout.on('data', (data) => {
+		console.log('was here');
 		res.status(200).send(data);
+	});
+	pythonProcess.on('close', (code) => {
+		if (code !== 0) {
+			console.log(`process exited with code ${code}`);
+			res.status(504).send('Service unavailable')	
+		}
+		else{
+			console.log('wakeword pid = ' + pythonProcess.pid);
+			pythonProcess.kill('SIGKILL');
+		}
 	});
 });
 
 router.get('/commands', function(req, res, next){
 	console.log('inside voice commands');
 	var file = req.dest + "finalDraft.py";
-	const spawn = require("child_process").spawn;
+	const { spawn } = require("child_process");
 	const pythonProcess = spawn('python',[file]);
 	pythonProcess.stdout.on('data', (data) => {
 		var resq = data.toString('utf8').split(/\r?\n/);
 		resq.length = 4;
 		res.status(200).send(resq);
+	});
+	pythonProcess.on('close', (code) => {
+		if (code !== 0) {
+			console.log(`process exited with code ${code}`);
+			res.send('Service unavailable')
+		}
+		else{
+			console.log('commands pid = ' + pythonProcess.pid);
+			pythonProcess.kill('SIGKILL');
+		}
 	});
 });
 

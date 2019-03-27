@@ -5,14 +5,47 @@ export const fetchVoice = () => dispatch => {
   axios.get('http://localhost:4000/commands')
       .then(response => {
         console.log(response.data);
-        dispatch({
+        if(response.data[0] === 'error'){
+          console.log('lmao');
+          dispatch({
+            type: FETCH_VOICE,
+            payload1: 'Couldnt understand what you said, try again',
+            payload2: response.data[1],
+            payload3: response.data[2],
+            payload4: response.data[3],
+            payload5: false,
+          })
+        }
+        else if(response.data[1] === 'command not found'){
+          dispatch({
+            type: FETCH_VOICE,
+            payload1: 'Command not found, try again. You said: ' + response.data[0],
+            payload2: response.data[1],
+            payload3: response.data[2],
+            payload4: response.data[3],
+            payload5: false,
+          })
+        }
+        else if(response.data[1] === 'command'){
+          console.log('in command');
+          dispatch({
+            type: FETCH_VOICE,
+            payload1: 'You said: ' + response.data[0],
+            payload2: response.data[1],
+            payload3: response.data[2],
+            payload5: false,
+          })
+        }
+        else{
+          dispatch({
             type: FETCH_VOICE,
             payload1: 'You said: ' + response.data[0],
             payload2: response.data[1],
             payload3: response.data[2],
             payload4: response.data[3],
             payload5: false,
-        })
+          })
+        }
       })
       .catch(function (error) {
         console.log(error);

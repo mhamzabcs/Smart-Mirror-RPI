@@ -31,7 +31,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "why": "concurrently --kill-others-on-fail \"react-scripts start\" \"cd server && npm start\""
+    "why": "concurrently --kill-others-on-fail \"react-scripts start\" \"cd server && npm start\"",
+    "pi": "concurrently --kill-others-on-fail \"npm run yolo\" \"cd server && npm start\""
   },
   "browserslist": [
     ">0.2%",

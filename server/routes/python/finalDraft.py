@@ -29,28 +29,43 @@ def getIntent(text):
     #strnobytesissue data = json.loads(resp.content)
     data = json.loads(resp.content.decode('utf-8'))
     # get text from data
-    intent=data['entities']['intent'][0]['value']
-    print(intent)
-    if(intent == 'play video'):
-        if 'youtube_param' in data['entities']:
-            print(data['entities']['youtube_param'][0]['value'])
-        else:
+    
+    if 'intent' in data['entities']:
+        intent=data['entities']['intent'][0]['value']
+        print(intent)
+        if(intent == 'play video'):
+            if 'youtube_param' in data['entities']:
+                print(data['entities']['youtube_param'][0]['value'])
+            else:
+                print(data['entities']['reminder'][0]['value'])
+        elif(intent == 'expand'):
+            print(data['entities']['widget_name'][0]['value'])
+        elif(intent == 'create_reminder'):
             print(data['entities']['reminder'][0]['value'])
-    elif(intent == 'expand'):
-        print(data['entities']['widget_name'][0]['value'])
-    elif(intent == 'create_reminder'):
-        print(data['entities']['reminder'][0]['value'])
-        print(data['entities']['datetime'][0]['value'])
+            print(data['entities']['datetime'][0]['value'])
+    else:
+        print('command not found')
 try:
     googleText = r.recognize_google(audio)
-    print(googleText)
-    getIntent(googleText)
+    if googleText == 'login' or googleText == 'log in':
+        print(googleText)
+        print("command")
+        print("login")
+    elif googleText == 'logout' or googleText == 'log out':
+        print(googleText)
+        print("command")
+        print("logout")
+    else:
+        print(googleText)
+        getIntent(googleText)
     sys.stdout.flush()
 except sr.UnknownValueError:
-    dataa = {
-        "text": "Google Speech Recognition could not understand audio"
-    }
-    print(dataa)
+    #dataa = {
+    #    "text": "Google Speech Recognition could not understand audio"
+    #}
+    #print(dataa)
+    print('error')
+    print('couldnt understand you')
 except sr.RequestError as e:
     print("Could not request results from Google Speech Recognition service; {0}".format(e))
 

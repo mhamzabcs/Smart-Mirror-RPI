@@ -7,7 +7,7 @@ var router = express.Router();
 router.get('/recognize', function(req, res, next) {
 	console.log('inside facial server');
 	const spawn = require("child_process").spawn;
-	var file = req.dest + "userFromPic.py";
+	var file = req.dest + "testpic.py";
 	const pythonProcess = spawn('python',[file]);
 	pythonProcess.stdout.on('data', (data) => {
     	res.status(200).send(data);
