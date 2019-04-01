@@ -42,7 +42,7 @@ router.get('/news', function(req, res, next) {
 
 router.get('/wakeWord', function(req, res, next) {
 	console.log('inside wakeword server');
-	const file = req.wake + "demo/python/backup.py"
+	const file = req.wake + "demo/python/porcupine_demo.py"
 	const model = req.wake + "smartmirror_windows.ppn"
 
 	const { spawn } = require("child_process");
@@ -51,7 +51,7 @@ router.get('/wakeWord', function(req, res, next) {
 		console.log('was here');
 		res.status(200).send(data);
 	});
-	pythonProcess.on('close', (code) => {
+	/*pythonProcess.on('close', (code) => {
 		if (code !== 0) {
 			console.log(`process exited with code ${code}`);
 			res.status(504).send('Service unavailable')	
@@ -60,7 +60,7 @@ router.get('/wakeWord', function(req, res, next) {
 			console.log('wakeword pid = ' + pythonProcess.pid);
 			pythonProcess.kill('SIGKILL');
 		}
-	});
+	});*/
 });
 
 router.get('/commands', function(req, res, next){
@@ -73,7 +73,7 @@ router.get('/commands', function(req, res, next){
 		resq.length = 4;
 		res.status(200).send(resq);
 	});
-	pythonProcess.on('close', (code) => {
+	/*pythonProcess.on('close', (code) => {
 		if (code !== 0) {
 			console.log(`process exited with code ${code}`);
 			res.send('Service unavailable')
@@ -82,7 +82,7 @@ router.get('/commands', function(req, res, next){
 			console.log('commands pid = ' + pythonProcess.pid);
 			pythonProcess.kill('SIGKILL');
 		}
-	});
+	});*/
 });
 
 //just to test if a script is spawning
