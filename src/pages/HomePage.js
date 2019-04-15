@@ -10,7 +10,8 @@ import axios from 'axios';
 import Modal from "react-responsive-modal";
 import FadeProps from 'fade-props';
 import { connect } from 'react-redux';
-import { fetchVoice, fetchWakeWord, changeMessage, fetchUser, voiceIndicator } from '../actions/voiceActions';
+import { fetchVoice, fetchWakeWord, changeMessage, fetchUser } from '../actions/voiceActions';
+import openSocket from 'socket.io-client';
 
 
 class Home extends Component {
@@ -19,14 +20,21 @@ class Home extends Component {
 	  super(props);
 	  this.state = {
 			open1: false, open2: false, open3: false, open4: false, open5: false,
+			login: false
 		}
 	}
 
 	componentDidMount(){
-		console.log('componentDidMount')
-		//this.getUserSettings();
-		var data = 'default user';
-		this.props.fetchUser(data);
+		console.log('componentDidMount');
+		const socket = openSocket('http://apes427.herokuapp.com');
+		socket.on('login', (message) => {
+			this.login(message);
+		});
+		socket.on('logout',() => {
+			this.logout();
+		});
+		this.getUserSettings();
+		//this.props.fetchUser('default user');
 		//this.recognizeFace();
 		console.log('calling wakeword')
 		this.wakeWord();
@@ -36,16 +44,32 @@ class Home extends Component {
 		clearInterval(this.intervalId)
 	}
 
+	login(username){
+		this.resetSettings();
+		this.props.changeMessage('Logging in...')
+		setTimeout(() => {
+			this.props.fetchUser(username);
+		}, 2000);
+	}
+
+	logout(){
+		this.resetSettings();
+		this.props.changeMessage('Logging out...');
+		setTimeout(() => {
+			this.props.fetchUser('default user');
+			this.props.changeMessage('Welcome!');
+		}, 2000);
+	}
 
 	componentDidUpdate(prevProps) {
+
 		if(this.props.goToVoiceApi !== prevProps.goToVoiceApi){
 			if(this.props.goToVoiceApi) {
 			  	console.log("componentDidUpdate calling voice func")
 			  	this.onCloseModal();
 				this.voiceFunction();
-				var vi = 'listening...'
 				setTimeout(() => {
-					this.props.voiceIndicator(vi)
+					this.props.changeMessage('Listening...')
 				}, 4000);
 			}
 			else{
@@ -53,22 +77,64 @@ class Home extends Component {
 			  	this.wakeWord();
 			}
 		}
-		if(this.props.detected === 'not detected'){
-			this.wakeWord();
-		}
 
 		if(this.props.username !== prevProps.username){
-			this.props.changeMessage(this.props.username)
+			this.props.changeMessage('Hey, '+this.props.username)
 			setTimeout(() => {
 			  this.getUserSettings();
 			}, 1000);
 		}
 
-		if(prevProps.message !== this.props.message){
-			setTimeout(() => {
-				this.props.changeMessage(this.props.username)
-			}, 4000);
+		if(this.props.intent !== prevProps.intent && this.props.message !== prevProps.message && this.props.intent !== ''){
+			let message = '';
+			if(this.props.username === 'default user'){
+				message = 'Welcome!'
+			}
+			else{
+				message = 'Hey, '+this.props.username
+			}
+			this.timer = setTimeout(() => {
+				this.props.changeMessage(message)
+			}, 5000);
 		}
+
+		if(this.props.value !== prevProps.value){
+
+			if(this.props.intent === 'expand'){
+				console.log(this.props.value)	
+    			this.onOpenModal(this.props.value);
+    		}
+
+    		if(this.props.intent === 'command'){
+	    		if(this.props.value === 'login'){
+	    			if(!this.state.login){
+		    			console.log('logging in');
+		    			clearTimeout(this.timer);
+		    			this.resetSettings();
+		    			this.props.changeMessage('Logging in, kindly look at the camera')
+		    			this.recognizeFace();
+	    			}
+	    			else{
+	    				this.props.changeMessage('You are already logged in!')
+	    			}
+	    		}
+	    		else if(this.props.value === 'logout'){
+	    			if(this.state.login){
+	    				clearTimeout(this.timer);
+		    			this.resetSettings();
+		    			this.props.changeMessage('Logging out...');
+		    			setTimeout(() => {
+		    				this.props.fetchUser('default user');
+		    				this.props.changeMessage('Welcome!');
+						}, 2000);
+		    		}
+		    		else{
+		    			this.props.changeMessage('You are already on the default page!')
+		    		}
+	    		}
+    		}
+
+    	}
 
 	}
 
@@ -105,18 +171,19 @@ class Home extends Component {
 			let data = response.data.trim();
 			console.log("user = " + data);
 
-			if(data === 'Unknown'){
+			if(data === 'Unknown' || data === 'no user'){
 		    	data = 'default user'
+		    	this.props.changeMessage('User not recognized, going back to the default page')
+		    	this.setState({ login: false})
+		    	setTimeout(() => {
+		    		this.props.changeMessage('Welcome!')
+			  		this.getUserSettings();
+				}, 3000);
 		    }
 
-			if(this.props.username !== data){
+			else if(this.props.username !== data){
 				this.props.fetchUser(data);
 			}
-			//else{
-			//	this.recognizeFace()
-			//}
-			var vi = '';
-			this.props.voiceIndicator(vi)
 		})
 		.catch(err =>{
 			console.log('err');
@@ -140,13 +207,23 @@ class Home extends Component {
 				else{
 					this.setState({
 						w1:'Weather',
-						w2:'DateAndTime',
+						w2:'Date And Time',
 						w3:'News',
-						w4:'Media Player'
+						w4:'Youtube Player'
 					});
 				}
 				//this.recognizeFace()
 			})
+    }
+
+    resetSettings(){
+    	this.setState({
+			w1:'',
+			w2:'',
+			w3:'',
+			w4:'',
+			login: !this.state.login
+		});
     }
 
 	voiceFunction(){
@@ -161,40 +238,25 @@ class Home extends Component {
 	}
 
 	wakeWord(){
-		console.log('wake word');
-		this.props.fetchWakeWord();
-		this.getIntent();
+		console.log('calling wake word');
+		axios.get('http://localhost:4000/wakeWord')
+	      .then(response => {
+	        let yoloo = response.data.trim();
+	        console.log(yoloo);
+	        if(yoloo === "detected"){
+	          console.log('wakeWord detected')
+	          clearTimeout(this.timer);
+	          this.props.fetchWakeWord();
+	        }
+	      })
+	      .catch((error) => {
+	        console.log('catch');
+	        this.wakeWord();
+	      })  
 	}
 
     message_prompt(){
-		return <FadeProps><h2>{this.props.message}</h2></FadeProps>  		
-    }
-    
-    getIntent(){
-    	console.log("in the intent");
-    	console.log(this.props.intent)
-    	if(this.props.intent === 'expand'){	
-    		this.onOpenModal(this.props.value);
-    	}
-    	if(this.props.intent === 'command'){
-    		console.log(this.props.value);
-    		if(this.props.value === 'login'){
-    			console.log('logging in');
-    			var vi = 'logging in, kindly look at the camera';
-    			this.props.voiceIndicator(vi)
-    			this.recognizeFace();
-    		}
-    		else if(this.props.value === 'logout'){
-    		var data = 'default user';
-				this.props.fetchUser(data);
-				var vii = 'logging out...';
-    			this.props.voiceIndicator(vii)
-    			setTimeout(() => {
-			  		vii = '';
-    				this.props.voiceIndicator(vii)
-				}, 1000);
-    		}
-    	}
+		return <FadeProps><p>{this.props.message}</p></FadeProps>  		
     }
 
     getDisp(open_modal,modal_component,simple_component){
@@ -229,14 +291,14 @@ class Home extends Component {
 															 </div>)
 
 											
-					case "Media Player": return this.getDisp(this.state.open4, <div> <br/><Video /> </div>,
-															<Video />) 
+					case "Youtube Player": return this.getDisp(this.state.open4, <div> <br/><Video size='modal-iframe'/> </div>,
+															   <Video size='resp-iframe'/>) 
 
 
 					case "Calendar":    return this.getDisp(this.state.open5, <div> <br/><Calendar /> </div>,
 															<Calendar />)
 
-					case "DateAndTime": return this.getDisp(this.state.open5, <div> <br/><Calendar /> </div>,
+					case "Date And Time": return this.getDisp(this.state.open5, <div> <br/><Calendar /> </div>,
 															<DateAndTime />)
 					default: 			return <div> </div>													
 								}
@@ -251,7 +313,7 @@ class Home extends Component {
 
 				<div className='container-fluid'>
 
-					<div className="row" id='top-widgets'>
+					<div className="row">
 
 						<div className="col-4" >
 							{this.disp(this.state.w1)}
@@ -264,24 +326,22 @@ class Home extends Component {
 					</div>
 
 
-					<div className="middle">{this.message_prompt()}</div>
+					<div className="middlew">{this.message_prompt()}</div>
 
 
 					<div className="row" id='bottom-widgets'>
 
-						<div className="col-4" id='bottom1'>
+						<div className="col-4">
 							{this.disp(this.state.w3)}
 						</div>
 
-						<div className="col-4 offset-8">
+						<div className="col-4 offset-4">
 							{this.disp(this.state.w4)}
 						</div>
 
 					</div>
 
 				</div>
-
-				<div id="middle"><p>{this.props.voiceText}</p></div>
 
 			</div>
 		);
@@ -290,15 +350,12 @@ class Home extends Component {
 }
 
 const mapStateToProps = state => ({
-  voiceText: state.voice.voiceText,
   intent: state.voice.intent,
   value: state.voice.value,
   date: state.voice.date,
   goToVoiceApi: state.voice.goToVoiceApi,
   message: state.voice.msg,
   username: state.voice.username,
-  detected: state.voice.detected,
-  v_indicator: state.voice.v_indicator
 });
 
-export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser, voiceIndicator })(Home);
+export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser})(Home);

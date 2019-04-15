@@ -70,6 +70,7 @@ router.get('/commands', function(req, res, next){
 	const pythonProcess = spawn('python',[file]);
 	pythonProcess.stdout.on('data', (data) => {
 		var resq = data.toString('utf8').split(/\r?\n/);
+		console.log(resq)
 		resq.length = 4;
 		res.status(200).send(resq);
 	});

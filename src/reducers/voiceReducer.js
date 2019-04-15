@@ -1,16 +1,13 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER, VOICE_INDICATOR } from '../actions/types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from '../actions/types';
 
 const initialState = {
-    voiceText: '',
     intent: '',
     value: '',
     date: '',
     goToVoiceApi: false,
-    msg: 'Recognizing...',
+    msg: 'Welcome!',
     videoId: 0,
-    username: '',
-    detected: '',
-    v_indicator:''
+    username: 'default user',
 }
 
 export default function (state = initialState, action) {
@@ -18,7 +15,7 @@ export default function (state = initialState, action) {
       case FETCH_VOICE:
         return {
             ...state,
-            voiceText: action.payload1,
+            msg: action.payload1,
             intent: action.payload2,
             value: action.payload3,
             date: action.payload4,
@@ -28,9 +25,9 @@ export default function (state = initialState, action) {
         return {
             ...state,
             goToVoiceApi: action.payload1,
-            voiceText: action.payload2,
+            msg: action.payload2,
             value: action.payload3,
-            detected:action.payload4
+            intent: action.payload4,
         };
       case NEW_REMINDER:
         return {
@@ -58,11 +55,6 @@ export default function (state = initialState, action) {
         return {
             ...state,
             username: action.payload
-        };
-      case VOICE_INDICATOR:
-        return {
-            ...state,
-            voiceText: action.payload
         };
       default: 
         return state;

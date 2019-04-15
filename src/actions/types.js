@@ -9,4 +9,3 @@ export const CHANGE_MESSAGE = 'CHANGE_MESSAGE';
 export const FETCH_VIDEO_ID = 'FETCH_VIDEO_ID';
 export const STOP_VIDEO = 'STOP_VIDEO';
 export const FETCH_USER = 'FETCH_USER';
-export const VOICE_INDICATOR = 'VOICE_INDICATOR';

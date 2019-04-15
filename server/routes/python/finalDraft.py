@@ -17,7 +17,7 @@ mic = sr.Microphone()
 with mic as source:
     r.adjust_for_ambient_noise(source,0.5)
     #print('say')
-    audio = r.record(source, duration=5)
+    audio = r.record(source, duration=6)
     #print('over')
 
 def getIntent(text):
@@ -47,11 +47,11 @@ def getIntent(text):
         print('command not found')
 try:
     googleText = r.recognize_google(audio)
-    if googleText == 'login' or googleText == 'log in':
+    if googleText == 'login' or googleText == 'log in' or googleText == 'signin' or googleText == 'sign in':
         print(googleText)
         print("command")
         print("login")
-    elif googleText == 'logout' or googleText == 'log out':
+    elif googleText == 'logout' or googleText == 'log out' or googleText == 'signout' or googleText == 'sign out':
         print(googleText)
         print("command")
         print("logout")
@@ -67,5 +67,6 @@ except sr.UnknownValueError:
     print('error')
     print('couldnt understand you')
 except sr.RequestError as e:
-    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+    #print("Could not request results from Google Speech Recognition service; {0}".format(e))
+    print("Network error")
 

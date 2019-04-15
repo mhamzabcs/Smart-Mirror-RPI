@@ -1,5 +1,7 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER, VOICE_INDICATOR } from './types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from './types';
 import axios from 'axios';
+
+let message = '';
 
 export const fetchVoice = () => dispatch => {
   axios.get('http://localhost:4000/commands')
@@ -7,86 +9,40 @@ export const fetchVoice = () => dispatch => {
         console.log(response.data);
         if(response.data[0] === 'error'){
           console.log('lmao');
-          dispatch({
-            type: FETCH_VOICE,
-            payload1: 'Couldnt understand what you said, try again',
-            payload2: response.data[1],
-            payload3: response.data[2],
-            payload4: response.data[3],
-            payload5: false,
-          })
+          message = 'Couldnt understand what you said, try again';
         }
         else if(response.data[1] === 'command not found'){
-          dispatch({
-            type: FETCH_VOICE,
-            payload1: 'Command not found, try again. You said: ' + response.data[0],
-            payload2: response.data[1],
-            payload3: response.data[2],
-            payload4: response.data[3],
-            payload5: false,
-          })
+          message = 'Command not found, try again. You said: ' + response.data[0];
         }
-        else if(response.data[1] === 'command'){
-          console.log('in command');
-          dispatch({
-            type: FETCH_VOICE,
-            payload1: 'You said: ' + response.data[0],
-            payload2: response.data[1],
-            payload3: response.data[2],
-            payload5: false,
-          })
+        else if(response.data[0] === 'Network error'){
+          message = 'Network error, check your internet connection';
         }
         else{
-          dispatch({
-            type: FETCH_VOICE,
-            payload1: 'You said: ' + response.data[0],
-            payload2: response.data[1],
-            payload3: response.data[2],
-            payload4: response.data[3],
-            payload5: false,
-          })
+          console.log('in command or in intent'); 
+          message = 'You said: ' + response.data[0];
         }
+        dispatch({
+          type: FETCH_VOICE,
+          payload1: message,
+          payload2: response.data[1],
+          payload3: response.data[2],
+          payload4: response.data[3],
+          payload5: false,
+        })
       })
       .catch(function (error) {
         console.log(error);
       })  
-};
+}
 
 export const fetchWakeWord = () => dispatch => {
-  axios.get('http://localhost:4000/wakeWord')
-      .then(response => {
-        let yoloo = response.data.trim();
-        console.log(yoloo);
-        if(yoloo === "detected"){
-          console.log('wakeWord detected')
-          dispatch({
-            type: FETCH_WAKE_WORD,
-            payload1: true,
-            payload2: 'please wait',
-            payload3: '',
-          })
-        }
-        else{
-          console.log('not detected');
-          var numb = Math.floor((Math.random() * 100) + 1);
-          console.log(numb);
-          dispatch({
-            type: FETCH_WAKE_WORD,
-            payload3: numb,
-            payload4: 'not detected'            
-          })
-        }
-      })
-      .catch(function (error) {
-        console.log('catch');
-          var numb = Math.floor((Math.random() * 100) + 1);
-          console.log(numb);
-          dispatch({
-            type: FETCH_WAKE_WORD,
-            payload3: numb,
-            payload4: 'not detected'            
-          })
-      })  
+  dispatch({
+    type: FETCH_WAKE_WORD,
+    payload1: true,
+    payload2: 'Please wait',
+    payload3: '',
+    payload4: '',
+  })   
 }
 
 export const createReminder = (value,date,username) => dispatch => {
@@ -96,24 +52,16 @@ export const createReminder = (value,date,username) => dispatch => {
         console.log(result.data);
         dispatch({
             type: NEW_REMINDER,
-            payload1: result.data,
+            payload1: result.data+'. '+message,
             payload2: ''
         })
      });
 }
 
-export const voiceIndicator = v_indicator => dispatch => {
-  console.log('yo')
-  dispatch({
-      type: VOICE_INDICATOR,
-      payload: v_indicator,
-  }) 
-}
-
-export const changeMessage = username => dispatch => {
+export const changeMessage = message => dispatch => {
   dispatch({
       type: CHANGE_MESSAGE,
-      payload: 'Hey, '+username,
+      payload: message,
   }) 
 }
 

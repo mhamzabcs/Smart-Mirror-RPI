@@ -65,7 +65,7 @@ class Reminders extends Component {
 	get_reminders(){
 
     	if(this.props.reminders.length < 1){
-    		return <p> no reminders yet </p>
+    		return <p className="pfont"> no reminders yet </p>
     	}
 
     	else{
@@ -101,7 +101,7 @@ class Reminders extends Component {
 		    		else{
 		    			diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + ' days';
 		    		}
-		            return <p obj={object} key={i}>{object.description} - {diffDays}</p>;
+		            return <p  className="pfont" obj={object} key={i}>{object.description} - {diffDays}</p>;
 		        });
 		    }
     }
