@@ -33,6 +33,9 @@ router.post('/db_alarms', function(req, res, next) {
       alarmsCollection.insert({
         day: req.body.day, 
         time: req.body.time, 
+        dayNumber: req.body.dayNumber,
+        hours: req.body.hours,
+        minutes: req.body.minutes,
         username: req.body.username
       })
   })

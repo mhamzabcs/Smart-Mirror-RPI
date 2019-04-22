@@ -174,16 +174,16 @@ class Home extends Component {
 		console.log(d);
 		let time = d.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true}).toLowerCase();
 		let date = d.toDateString();
-		let day = d.getDay();
-		console.log(date.slice(0,3));
-		console.log(day);
-		console.log(time);
-		this.props.setAlarm(date.slice(0,3),time,this.props.username);
-		this.sendAlarm(date.slice(0,3),time);
+		let dayNumber = d.getDay();
+		let hours = d.getHours();
+		let minutes = d.getMinutes();
+		this.props.setAlarm(date.slice(0,3),time,dayNumber,hours,minutes,this.props.username);
+		this.sendAlarm(date.slice(0,3),time,dayNumber,hours,minutes);
 	}
 	//this
-	sendAlarm(day,time){
-		axios.post('https://apes427.herokuapp.com/mobile/sendAlarm', { day:day, time:time, username:this.props.username })
+	sendAlarm(day,time,dayNumber,hours,minutes){
+		axios.post('https://apes427.herokuapp.com/mobile/sendAlarm', { day:day, time:time, dayNumber:dayNumber, hours:hours,
+			minutes:minutes, username:this.props.username })
 		.then(response =>{
 			console.log(response);
 		});

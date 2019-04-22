@@ -58,9 +58,9 @@ export const createReminder = (value,date,username) => dispatch => {
      });
 }
 
-export const setAlarm = (day,time,username) => dispatch => {
+export const setAlarm = (day,time,dayNumber,hours,minutes,username) => dispatch => {
   axios.post('http://localhost:4000/users/db_alarms', 
-    { day:day, time:time, username:username })
+    { day:day, time:time, dayNumber:dayNumber, hours:hours, minutes:minutes, username:username })
       .then((result) => {
         console.log(result.data);
         dispatch({
