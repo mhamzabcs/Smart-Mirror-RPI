@@ -5,7 +5,7 @@ import { fetchReminders } from '../actions/remindersActions';
 import { createReminder } from "../actions/voiceActions";
 import openSocket from 'socket.io-client';
 
-const socket = openSocket('http://127.0.0.1:5000');
+const socket = openSocket('https://apes427.herokuapp.com');
 
 
 class Reminders extends Component {
