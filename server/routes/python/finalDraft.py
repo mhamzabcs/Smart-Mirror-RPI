@@ -17,7 +17,7 @@ mic = sr.Microphone()
 with mic as source:
     r.adjust_for_ambient_noise(source,0.5)
     #print('say')
-    audio = r.record(source, duration=6)
+    audio = r.record(source, duration=5)
     #print('over')
 
 def getIntent(text):
@@ -42,6 +42,9 @@ def getIntent(text):
             print(data['entities']['widget_name'][0]['value'])
         elif(intent == 'create_reminder'):
             print(data['entities']['reminder'][0]['value'])
+            print(data['entities']['datetime'][0]['value'])
+        elif(intent == 'create_alarm'):
+            print(data['entities'])
             print(data['entities']['datetime'][0]['value'])
     else:
         print('command not found')

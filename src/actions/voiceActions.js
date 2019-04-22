@@ -1,4 +1,4 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from './types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, NEW_ALARM, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from './types';
 import axios from 'axios';
 
 let message = '';
@@ -9,7 +9,7 @@ export const fetchVoice = () => dispatch => {
         console.log(response.data);
         if(response.data[0] === 'error'){
           console.log('lmao');
-          message = 'Couldnt understand what you said, try again';
+          message = 'Could not understand what you said, try again';
         }
         else if(response.data[1] === 'command not found'){
           message = 'Command not found, try again. You said: ' + response.data[0];
@@ -52,6 +52,19 @@ export const createReminder = (value,date,username) => dispatch => {
         console.log(result.data);
         dispatch({
             type: NEW_REMINDER,
+            payload1: result.data+'. '+message,
+            payload2: ''
+        })
+     });
+}
+
+export const setAlarm = (day,time,username) => dispatch => {
+  axios.post('http://localhost:4000/users/db_alarms', 
+    { day:day, time:time, username:username })
+      .then((result) => {
+        console.log(result.data);
+        dispatch({
+            type: NEW_ALARM,
             payload1: result.data+'. '+message,
             payload2: ''
         })

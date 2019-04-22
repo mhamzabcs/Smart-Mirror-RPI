@@ -1,4 +1,4 @@
-import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from '../actions/types';
+import { FETCH_VOICE, FETCH_WAKE_WORD, NEW_REMINDER, NEW_ALARM, CHANGE_MESSAGE, FETCH_VIDEO_ID, STOP_VIDEO, FETCH_USER } from '../actions/types';
 
 const initialState = {
     intent: '',
@@ -30,6 +30,12 @@ export default function (state = initialState, action) {
             intent: action.payload4,
         };
       case NEW_REMINDER:
+        return {
+            ...state,
+            msg: action.payload1,
+            intent: action.payload2
+        };
+      case NEW_ALARM:
         return {
             ...state,
             msg: action.payload1,

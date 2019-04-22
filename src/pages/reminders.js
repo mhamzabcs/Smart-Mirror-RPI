@@ -3,6 +3,9 @@ import FadeProps from 'fade-props';
 import { connect } from 'react-redux';
 import { fetchReminders } from '../actions/remindersActions';
 import { createReminder } from "../actions/voiceActions";
+import openSocket from 'socket.io-client';
+
+const socket = openSocket('http://127.0.0.1:5000');
 
 
 class Reminders extends Component {
@@ -15,22 +18,28 @@ class Reminders extends Component {
 	}
 
 	componentDidMount(){
-			
-			this.props.fetchReminders(this.props.rems.username); 
 
-			this.intervalId = setInterval(() => {
-				if(this.props.reminders.length > 3 && this.props.modal !== true){
-					if(this.props.reminders.length%2 === 0 && this.props.reminders[this.state.j] === undefined){
-						this.resetArr()
-					}
-					else if(this.props.reminders.length%2 === 1 && this.props.reminders[this.state.j+1] === undefined){
-						this.resetArr()
-					}
-					else{
-			      		this.setState({i:this.state.i+2, j:this.state.j+2})
-			      	}
-			    }
-		    }, 3000);
+		socket.on('reminders', (response) => {
+			console.log(response);
+			console.log(this.props.reminders);
+			this.props.fetchReminders(this.props.rems.username);
+		});
+			
+		this.props.fetchReminders(this.props.rems.username); 
+
+		this.intervalId = setInterval(() => {
+			if(this.props.reminders.length > 3 && this.props.modal !== true){
+				if(this.props.reminders.length%2 === 0 && this.props.reminders[this.state.j] === undefined){
+					this.resetArr()
+				}
+				else if(this.props.reminders.length%2 === 1 && this.props.reminders[this.state.j+1] === undefined){
+					this.resetArr()
+				}
+				else{
+		      		this.setState({i:this.state.i+2, j:this.state.j+2})
+		      	}
+		    }
+	    }, 3000);
                                                                                                                  
 	}
 
@@ -54,7 +63,6 @@ class Reminders extends Component {
 			this.props.reminders.push(this.props.rems);
 
 		}
-
 
 	}
 

@@ -10,33 +10,34 @@ import axios from 'axios';
 import Modal from "react-responsive-modal";
 import FadeProps from 'fade-props';
 import { connect } from 'react-redux';
-import { fetchVoice, fetchWakeWord, changeMessage, fetchUser } from '../actions/voiceActions';
+import { fetchVoice, fetchWakeWord, changeMessage, fetchUser, setAlarm } from '../actions/voiceActions';
 import openSocket from 'socket.io-client';
+
+const socket = openSocket('http://127.0.0.1:5000');
 
 
 class Home extends Component {
   
-  constructor(props) {
-	  super(props);
-	  this.state = {
-			open1: false, open2: false, open3: false, open4: false, open5: false,
+  	constructor(props) {
+		super(props);
+		this.state = {
+			weather: false, news: false, reminders: false, video: false, calendar: false,
 			login: false
 		}
 	}
 
 	componentDidMount(){
 		console.log('componentDidMount');
-		const socket = openSocket('http://apes427.herokuapp.com');
-		socket.on('login', (message) => {
-			this.login(message);
+		socket.on('login', (user) => {
+			this.login(user,"Logging in...");
 		});
 		socket.on('logout',() => {
-			this.logout();
+			this.logout(true);
 		});
+		socket.on('setting',() => {
+			this.getUserSettings();
+		})
 		this.getUserSettings();
-		//this.props.fetchUser('default user');
-		//this.recognizeFace();
-		console.log('calling wakeword')
 		this.wakeWord();
 	}
 
@@ -44,21 +45,61 @@ class Home extends Component {
 		clearInterval(this.intervalId)
 	}
 
-	login(username){
-		this.resetSettings();
-		this.props.changeMessage('Logging in...')
-		setTimeout(() => {
-			this.props.fetchUser(username);
-		}, 2000);
+	login(username,msg){
+		if(!this.state.login){
+			console.log('logging in');
+			clearTimeout(this.timer);
+			this.resetSettings();
+			this.props.changeMessage(msg);
+			if(username){ 
+				this.sendResponse('Logged into the Smart Mirror');
+				setTimeout(() => {this.props.fetchUser(username)}, 2000)
+			}
+			else{
+				this.recognizeFace();
+			}
+		}
+		else{
+			let message = 'Already logged in!';
+			this.props.changeMessage(message);
+			if(username){
+				this.sendResponse(message);
+				this.timer = setTimeout(() => {
+					this.props.changeMessage('Hey, '+this.props.username)
+				}, 5000);
+			}
+		}
 	}
 
-	logout(){
-		this.resetSettings();
-		this.props.changeMessage('Logging out...');
-		setTimeout(() => {
-			this.props.fetchUser('default user');
-			this.props.changeMessage('Welcome!');
-		}, 2000);
+	logout(mobile){
+		let response = '';
+		if(this.state.login){
+			response = 'Logged out of the Smart Mirror';
+			clearTimeout(this.timer);
+			this.resetSettings();
+			this.props.changeMessage('Logging out...');
+			setTimeout(() => {
+				this.props.fetchUser('default user');
+				this.props.changeMessage('Welcome!');
+			}, 2000);
+		}
+		else{
+			response = 'You are already on the default page!';
+			this.props.changeMessage(response)
+			if(mobile){
+				this.timer = setTimeout(() => {
+					this.props.changeMessage('Welcome!');
+				}, 5000);
+			}
+		}
+		this.sendResponse(response);
+	}
+
+	sendResponse(res){
+		axios.post('http://localhost:5000/mobile/response', {response:res})
+		.then(response =>{
+			console.log(response);
+		});
 	}
 
 	componentDidUpdate(prevProps) {
@@ -99,69 +140,57 @@ class Home extends Component {
 		}
 
 		if(this.props.value !== prevProps.value){
-
 			if(this.props.intent === 'expand'){
-				console.log(this.props.value)	
-    			this.onOpenModal(this.props.value);
+				console.log(this.props.value);
+				this.setState({ [this.props.value]: true });	
     		}
-
     		if(this.props.intent === 'command'){
 	    		if(this.props.value === 'login'){
-	    			if(!this.state.login){
-		    			console.log('logging in');
-		    			clearTimeout(this.timer);
-		    			this.resetSettings();
-		    			this.props.changeMessage('Logging in, kindly look at the camera')
-		    			this.recognizeFace();
-	    			}
-	    			else{
-	    				this.props.changeMessage('You are already logged in!')
-	    			}
+	    			this.login(null,'Logging in, kindly look at the camera');
 	    		}
 	    		else if(this.props.value === 'logout'){
-	    			if(this.state.login){
-	    				clearTimeout(this.timer);
-		    			this.resetSettings();
-		    			this.props.changeMessage('Logging out...');
-		    			setTimeout(() => {
-		    				this.props.fetchUser('default user');
-		    				this.props.changeMessage('Welcome!');
-						}, 2000);
-		    		}
-		    		else{
-		    			this.props.changeMessage('You are already on the default page!')
-		    		}
+	    			this.logout(false);
 	    		}
     		}
-
+    		if(this.props.intent === 'create_alarm'){
+    			if(this.props.username === 'default user'){
+    				this.props.changeMessage("Sorry, You have to login to set alarms.");
+    			}
+    			else{
+    				console.log(this.props.date);
+    				if(!this.props.date){
+						this.props.changeMessage("Sorry, couldn't set the alarm, try again.")
+						return;
+					}
+    				this.setAlarm();
+    			}
+    		}
     	}
 
 	}
 
-  	onOpenModal(widget){
-  		switch(widget) {
-		  case 'weather':
-		    this.setState({ open1: true })
-		    break;
-		  case 'news':
-		    this.setState({ open2: true })
-		    break;
-		  case 'reminders':
-		    this.setState({ open3: true })
-		    break;
-		  case 'video':
-		    this.setState({ open4: true })
-		    break;
-		  case 'calendar':
-		    this.setState({ open5: true })
-		    break;
-		  default:
-		  	break;
-		}
-  	}
+	setAlarm(){
+		let d = new Date(this.props.date);
+		console.log(d);
+		let time = d.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true}).toLowerCase();
+		let date = d.toDateString();
+		let day = d.getDay();
+		console.log(date.slice(0,3));
+		console.log(day);
+		console.log(time);
+		this.props.setAlarm(date.slice(0,3),time,this.props.username);
+		this.sendAlarm(date.slice(0,3),time);
+	}
+
+	sendAlarm(day,time){
+		axios.post('http://localhost:5000/mobile/sendAlarm', { day:day, time:time, username:this.props.username })
+		.then(response =>{
+			console.log(response);
+		});
+	}
 
   	onCloseModal = () => {
-    	this.setState({ open1: false, open2: false, open3: false, open4: false, open5: false});
+    	this.setState({ weather: false, news: false, reminders: false, video: false, calendar: false});
   	}
 
   	recognizeFace(){
@@ -193,6 +222,7 @@ class Home extends Component {
     }
 
     getUserSettings(){
+    	console.log("getting settings");
     	axios.post('http://localhost:4000/users/getSettings', {username:this.props.username})
 			.then(response => {
 				console.log(response.data);
@@ -278,27 +308,27 @@ class Home extends Component {
     	return <div>
 					{(() => {
 					switch (widget_name) {
-					case "Weather": 	return this.getDisp(this.state.open1, <h3><Weather modal={true}/></h3>, 
+					case "Weather": 	return this.getDisp(this.state.weather, <h3><Weather modal={true}/></h3>, 
 															<div className="font"><Weather modal={false}/></div>)
 
 
-					case "News": 		return this.getDisp(this.state.open2, <div> <h2><u>News</u></h2> <News modal={true}/> </div>,
+					case "News": 		return this.getDisp(this.state.news, <div> <h2><u>News</u></h2> <News modal={true}/> </div>,
 															<div> <p className="font"><u>News</u></p> <News modal={false}/> </div>)
 
 
-					case "Reminders":   return this.getDisp(this.state.open3, <div> <h2><u>Reminders</u></h2> <Reminders modal={true}/> </div>,
+					case "Reminders":   return this.getDisp(this.state.reminders, <div> <h2><u>Reminders</u></h2> <Reminders modal={true}/> </div>,
 															<div> <p className="font"><u>Reminders</u></p> <Reminders modal={false}/> 
 															 </div>)
 
 											
-					case "Youtube Player": return this.getDisp(this.state.open4, <div> <br/><Video size='modal-iframe'/> </div>,
+					case "Youtube Player": return this.getDisp(this.state.video, <div> <br/><Video size='modal-iframe'/> </div>,
 															   <Video size='resp-iframe'/>) 
 
 
-					case "Calendar":    return this.getDisp(this.state.open5, <div> <br/><Calendar /> </div>,
+					case "Calendar":    return this.getDisp(this.state.calendar, <div> <br/><Calendar /> </div>,
 															<Calendar />)
 
-					case "Date And Time": return this.getDisp(this.state.open5, <div> <br/><Calendar /> </div>,
+					case "Date And Time": return this.getDisp(this.state.calendar, <div> <br/><Calendar /> </div>,
 															<DateAndTime />)
 					default: 			return <div> </div>													
 								}
@@ -358,4 +388,4 @@ const mapStateToProps = state => ({
   username: state.voice.username,
 });
 
-export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser})(Home);
+export default connect(mapStateToProps, { fetchVoice, fetchWakeWord, changeMessage, fetchUser, setAlarm})(Home);
