@@ -37,12 +37,19 @@ class Home extends Component {
 		socket.on('setting',() => {
 			this.getUserSettings();
 		})
+		socket.on('refresh',()=>{
+			this.refresh();
+		})
 		this.getUserSettings();
 		this.wakeWord();
 	}
 
 	componentWillUnmount(){
 		clearInterval(this.intervalId)
+	}
+
+	refresh(){
+		window.location.reload();
 	}
 
 	login(username,msg){
