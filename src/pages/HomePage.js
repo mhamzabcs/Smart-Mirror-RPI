@@ -22,7 +22,8 @@ class Home extends Component {
 		super(props);
 		this.state = {
 			weather: false, news: false, reminders: false, video: false, calendar: false,
-			login: false
+			login: false,
+			On: true,
 		}
 	}
 
@@ -40,12 +41,38 @@ class Home extends Component {
 		socket.on('refresh',()=>{
 			this.refresh();
 		})
+		socket.on('changeState',()=>{
+			this.turnOnOff();
+		})
 		this.getUserSettings();
 		this.wakeWord();
 	}
 
 	componentWillUnmount(){
 		clearInterval(this.intervalId)
+	}
+
+	turnOnOff(){
+		if(this.state.On){
+			this.setState({
+				w1:'',
+				w2:'',
+				w3:'',
+				w4:'',
+				On:!this.state.On,
+			});
+			this.props.changeMessage("");
+		}
+		else{
+			this.getUserSettings();
+			this.setState({On:!this.state.On});
+			if(this.props.username === 'default user'){
+				this.props.changeMessage("Welcome!");
+			}
+			else{
+				this.props.changeMessage("Hey, "+this.props.username);
+			}
+		}
 	}
 
 	refresh(){
