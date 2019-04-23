@@ -13,7 +13,7 @@ import { connect } from 'react-redux';
 import { fetchVoice, fetchWakeWord, changeMessage, fetchUser, setAlarm } from '../actions/voiceActions';
 import openSocket from 'socket.io-client';
 
-const socket = openSocket('http://127.0.0.1:5000');
+const socket = openSocket('https://apes427.herokuapp.com');
 
 
 class Home extends Component {
@@ -99,7 +99,7 @@ class Home extends Component {
 	}
 	//this
 	sendResponse(res,user){
-		axios.post('http://127.0.0.1:5000/mobile/response', {response:res, username:user})
+		axios.post('https://apes427.herokuapp.com/mobile/response', {response:res, username:user})
 		.then(response =>{
 			console.log(response);
 		});
@@ -185,7 +185,7 @@ class Home extends Component {
 	}
 	//this
 	sendAlarm(day,time,dayNumber,hours,minutes){
-		axios.post('http://127.0.0.1:5000/mobile/sendAlarm', { day:day, time:time, dayNumber:dayNumber, hours:hours,
+		axios.post('https://apes427.herokuapp.com/mobile/sendAlarm', { day:day, time:time, dayNumber:dayNumber, hours:hours,
 			minutes:minutes, username:this.props.username })
 		.then(response =>{
 			console.log(response);
