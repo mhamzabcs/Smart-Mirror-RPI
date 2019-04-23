@@ -9,13 +9,13 @@ router.post('/getSettings', function(req, res, next) {
   var widgetCollection = db.get("widgets");
   widgetCollection.find({'username':req.body.username}, {}, function(err, widgets){
     console.log(widgets)
-    if(widgets.length === 0){
-      console.log('no settings for this user');
-      res.status(200).send('no settings');
-    }
-    else{
+    if(widgets && widgets.length !== 0){
       console.log('settings for this user exist');
       res.status(200).send(widgets[0]);
+    }
+    else{
+      console.log('no settings for this user');
+      res.status(200).send('no settings');
     }
   })
 });
@@ -68,14 +68,14 @@ router.post('/get_reminders', function(req, res, next) {
   var widgetCollection = db.get("reminders");
   widgetCollection.find({'username':req.body.username}, {}, function(err, reminders){
     console.log(reminders)
-    if(reminders.length === 0){
-      console.log('no reminders for this user');
-      res.status(200).send('no reminders');
-    }
-    else{
+    if(reminders && reminders.length !== 0){
       console.log('reminders for this user exist');
       console.log(reminders)
       res.status(200).send(reminders);
+    }
+    else{
+      console.log('no reminders for this user');
+      res.status(200).send('no reminders');
     }
   })
 });

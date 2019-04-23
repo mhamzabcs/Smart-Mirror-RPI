@@ -13,7 +13,7 @@ import { connect } from 'react-redux';
 import { fetchVoice, fetchWakeWord, changeMessage, fetchUser, setAlarm } from '../actions/voiceActions';
 import openSocket from 'socket.io-client';
 
-const socket = openSocket('http://apes427.herokuapp.com');
+const socket = openSocket('http://127.0.0.1:5000');
 
 
 class Home extends Component {
@@ -31,8 +31,8 @@ class Home extends Component {
 		socket.on('login', (user) => {
 			this.login(user,"Logging in...");
 		});
-		socket.on('logout',() => {
-			this.logout(true);
+		socket.on('logout',(user) => {
+			this.logout(user,"Logging out...");
 		});
 		socket.on('setting',() => {
 			this.getUserSettings();
@@ -52,7 +52,7 @@ class Home extends Component {
 			this.resetSettings();
 			this.props.changeMessage(msg);
 			if(username){ 
-				this.sendResponse('Logged into the Smart Mirror');
+				this.sendResponse('Logged into the Smart Mirror',username);
 				setTimeout(() => {this.props.fetchUser(username)}, 2000)
 			}
 			else{
@@ -63,7 +63,7 @@ class Home extends Component {
 			let message = 'Already logged in!';
 			this.props.changeMessage(message);
 			if(username){
-				this.sendResponse(message);
+				this.sendResponse(message,username);
 				this.timer = setTimeout(() => {
 					this.props.changeMessage('Hey, '+this.props.username)
 				}, 5000);
@@ -71,32 +71,35 @@ class Home extends Component {
 		}
 	}
 
-	logout(mobile){
+	logout(username,msg){
 		let response = '';
 		if(this.state.login){
 			response = 'Logged out of the Smart Mirror';
 			clearTimeout(this.timer);
 			this.resetSettings();
-			this.props.changeMessage('Logging out...');
+			this.props.changeMessage(msg);
 			setTimeout(() => {
 				this.props.fetchUser('default user');
 				this.props.changeMessage('Welcome!');
 			}, 2000);
+			if(username){
+				this.sendResponse(response,username);
+			}
 		}
 		else{
 			response = 'You are already on the default page!';
 			this.props.changeMessage(response)
-			if(mobile){
+			if(username){
 				this.timer = setTimeout(() => {
 					this.props.changeMessage('Welcome!');
 				}, 5000);
+				this.sendResponse(response,username);
 			}
 		}
-		this.sendResponse(response);
 	}
 	//this
-	sendResponse(res){
-		axios.post('https://apes427.herokuapp.com/mobile/response', {response:res})
+	sendResponse(res,user){
+		axios.post('http://127.0.0.1:5000/mobile/response', {response:res, username:user})
 		.then(response =>{
 			console.log(response);
 		});
@@ -182,7 +185,7 @@ class Home extends Component {
 	}
 	//this
 	sendAlarm(day,time,dayNumber,hours,minutes){
-		axios.post('https://apes427.herokuapp.com/mobile/sendAlarm', { day:day, time:time, dayNumber:dayNumber, hours:hours,
+		axios.post('http://127.0.0.1:5000/mobile/sendAlarm', { day:day, time:time, dayNumber:dayNumber, hours:hours,
 			minutes:minutes, username:this.props.username })
 		.then(response =>{
 			console.log(response);
