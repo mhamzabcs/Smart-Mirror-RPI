@@ -186,7 +186,7 @@ class Home extends Component {
 	    			this.login(null,'Logging in, kindly look at the camera');
 	    		}
 	    		else if(this.props.value === 'logout'){
-	    			this.logout(false);
+	    			this.logout(false,"Logging out...");
 	    		}
     		}
     		if(this.props.intent === 'create_alarm'){
